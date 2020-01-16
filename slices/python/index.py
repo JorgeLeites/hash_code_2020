@@ -14,6 +14,7 @@ file.close()
 max_values = [{'slices': 0, 'pizzas': [False for pizza in pizzas]}]
 
 for index in range(1, max_slices + 1):
+    print(str(100 * index / max_slices) + '%')
     candidate_values = max_values[index-1].copy()
     for pizza_number, pizza_slices in enumerate(pizzas):
         if pizza_slices > index:
