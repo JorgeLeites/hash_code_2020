@@ -1,4 +1,5 @@
 import sys
+import numpy as np
 
 # Read the file
 input_file = sys.argv[1]
@@ -7,46 +8,41 @@ file = open(input_file, 'r')
 first_line = file.readline().split(' ')
 max_slices = int(first_line[0])
 amount_of_pizzas = int(first_line[1])
-pizzas = [int(pizza_slices) for pizza_slices in file.readline().split(' ')]
+pizzas = np.array([int(pizza_slices) for pizza_slices in file.readline().split(' ')], dtype=np.uint32)
 file.close()
 
 # Do the math
-max_values = [[0] for pizza in pizzas]
-max_values.append([0])
-for index in range(1, max_slices + 1):
-    max_values[0].append(0)
+max_values = np.empty((max_slices + 1, amount_of_pizzas + 1), dtype=np.uint32)
+for index in range (0, max_slices + 1):
+    max_values[index][0] = 0
+for index in range (0, amount_of_pizzas + 1):
+    max_values[0][index] = 0
 
-for index in range(1, max_slices + 1):
-    print(str(100 * index / max_slices) + '%')
-    for pizza_number, pizza_slices in enumerate(pizzas):
-        pizza_number += 1
-        if pizza_slices > index:
-            max_values[pizza_number].append(max_values[pizza_number - 1][index])
-        else:
-            value_with = max_values[pizza_number - 1][index - pizza_slices] + pizza_slices
-            value_without = max_values[pizza_number - 1][index]
-            max_value = max(value_with, value_without)
-            max_values[pizza_number].append(max_value)
+for slices in range (1, max_slices + 1):
+    for pizza_index in range (1, amount_of_pizzas + 1):
+        slices_without_pizza = max_values[slices][pizza_index - 1]
+        max_values[slices][pizza_index] = slices_without_pizza
+        amount_of_slices = pizzas[pizza_index - 1]
+        if amount_of_slices <= slices:
+            slices_with_pizza = amount_of_slices + max_values[slices - amount_of_slices][pizza_index - 1]
+            if (slices_with_pizza > slices_without_pizza):
+                max_values[slices][pizza_index] = slices_with_pizza
 
 # Final results
 selected_pizzas = []
-def find_solution(pizza_index, amount_index):
-    if pizza_index > 0 and amount_index > 0:
-        pizza_slices = pizzas[pizza_index - 1]
-        if pizza_slices <= amount_index:
-            value_with = max_values[pizza_index - 1][amount_index - pizza_slices] + pizza_slices
-            value_without = max_values[pizza_index - 1][amount_index]
-            if value_with > value_without:
-                selected_pizzas.append(pizza_index - 1)
-                find_solution(pizza_index - 1, amount_index - pizza_slices)
-            else:
-                find_solution(pizza_index - 1, amount_index)
+def find_solution(slices, pizza_index):
+    if slices > 0 and pizza_index > 0:
+        amount_of_slices = pizzas[pizza_index - 1]
+        slices_without_pizza = max_values[slices][pizza_index - 1]
+        slices_with_pizza = amount_of_slices + max_values[slices - amount_of_slices][pizza_index - 1]
+        if amount_of_slices > slices or slices_without_pizza > slices_with_pizza:
+            find_solution(slices, pizza_index - 1)
         else:
-            find_solution(pizza_index - 1, amount_index)
+            selected_pizzas.append(str(pizza_index - 1))
+            find_solution(slices - amount_of_slices, pizza_index - 1)
 
-find_solution(amount_of_pizzas, max_slices)
+find_solution(max_slices, amount_of_pizzas)
 selected_pizzas.sort()
-selected_pizzas = [str(selected_pizza) for selected_pizza in selected_pizzas]
 
 # Write the output file
 output_file = input_file[slice(-2)] + 'out'
