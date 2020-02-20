@@ -39,8 +39,6 @@ with open(f'{file_name}.in') as f:
 selected_libraries = []
 books_seen = set()
 while remaining_time > 0:
-    print(remaining_time)
-
     library_with_max_score = ''
     max_score = 0
     for library in libraries:
@@ -56,7 +54,7 @@ while remaining_time > 0:
 
             if score >= max_score:
                 library_with_max_score = library
-                score = max_score
+                max_score = score
     if library_with_max_score == '':
         break
     remaining_time -= library_with_max_score.signup_duration
