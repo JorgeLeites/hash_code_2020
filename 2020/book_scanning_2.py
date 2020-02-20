@@ -3,7 +3,14 @@ from collections import namedtuple
 
 # Handling input
 
-Library = namedtuple('Library', ['id', 'number_of_books', 'signup_duration', 'books_per_day', 'books'])
+class Library:
+    def __init__(self, id, number_of_books, signup_duration, books_per_day, books, score=0):
+        self.id = id
+        self.number_of_books = number_of_books
+        self.signup_duration = signup_duration
+        self.books_per_day = books_per_day
+        self.books = books
+        self.score = score
 
 file_name = sys.argv[1]
 libraries = []
@@ -29,11 +36,14 @@ with open(f'{file_name}.in') as f:
 
 # Compute
 selected_libraries = []
+books_seen = set()
 while remaining_time > 0:
     print(remaining_time)
     library_with_max_score = ''
     max_score = 0
     for library in libraries:
+        library.books = [book for book in library.books if book not in books_seen]
+        library.number_of_books = len(library.books)
         books_library_can_process = min(
             (remaining_time - library.signup_duration) * library.books_per_day, library.number_of_books
         )
@@ -46,6 +56,8 @@ while remaining_time > 0:
     remaining_time -= library_with_max_score.signup_duration
     libraries.remove(library_with_max_score)
     selected_libraries.append(library_with_max_score)
+    for book in library_with_max_score.books:
+        books_seen.add(book)
 
 # Handling output
 with open(f'{file_name}.out', 'w') as f:
