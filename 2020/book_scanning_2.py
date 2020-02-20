@@ -44,18 +44,19 @@ while remaining_time > 0:
     library_with_max_score = ''
     max_score = 0
     for library in libraries:
-        library.books = [book for book in library.books if book not in books_seen]
-        library.number_of_books = len(library.books)
-        books_library_can_process = min(
-            (remaining_time - library.signup_duration) * library.books_per_day, library.number_of_books
-        )
+        if library.signup_duration < remaining_time:
+            library.books = [book for book in library.books if book not in books_seen]
+            library.number_of_books = len(library.books)
+            books_library_can_process = min(
+                (remaining_time - library.signup_duration) * library.books_per_day, library.number_of_books
+            )
 
-        book_scores = (books[index] for index in library.books[0:books_library_can_process])
-        score = sum(book_scores)
+            book_scores = (books[index] for index in library.books[0:books_library_can_process])
+            score = sum(book_scores)
 
-        if score >= max_score:
-            library_with_max_score = library
-            score = max_score
+            if score >= max_score:
+                library_with_max_score = library
+                score = max_score
     if library_with_max_score == '':
         break
     remaining_time -= library_with_max_score.signup_duration
