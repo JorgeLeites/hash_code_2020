@@ -22,8 +22,9 @@ with open(f'{file_name}.in') as f:
 
     for i in range(number_of_libraries):
         number_of_books_in_library, days_to_finish_signup, books_shipped_per_day = (int(value) for value in f.readline().strip().split(' '))
-        books_in_library = [int(score) for score in f.readline().strip().split(' ')]
-        books_in_library.sort(reverse=True)
+        books_in_library = [int(book) for book in f.readline().strip().split(' ')]
+
+        books_in_library.sort(key=lambda x: books[x], reverse=True)
 
         library = Library(
             i,
@@ -39,6 +40,7 @@ selected_libraries = []
 books_seen = set()
 while remaining_time > 0:
     print(remaining_time)
+
     library_with_max_score = ''
     max_score = 0
     for library in libraries:
@@ -47,7 +49,10 @@ while remaining_time > 0:
         books_library_can_process = min(
             (remaining_time - library.signup_duration) * library.books_per_day, library.number_of_books
         )
-        score = sum(library.books[0:books_library_can_process])
+
+        book_scores = (books[index] for index in library.books[0:books_library_can_process])
+        score = sum(book_scores)
+
         if score >= max_score:
             library_with_max_score = library
             score = max_score
